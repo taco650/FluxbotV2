@@ -1,5 +1,5 @@
 #rpi serial communication
-#Python app to run a K-30 Sensor
+#Python app to run a COZIR Sensor
 #Uses UART to communicate
 from machine import UART
 import time

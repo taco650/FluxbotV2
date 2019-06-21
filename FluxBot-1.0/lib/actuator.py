@@ -13,10 +13,6 @@ class Actuator:
     
     position = 0
 
-
-   
-
-
     #default state should be closed
     def __init__(self, acuationTime = CONSTANTS.ACTUATION_TIME):
         print("Initializing Actuator")

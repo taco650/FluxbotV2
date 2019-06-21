@@ -1,7 +1,10 @@
-import time
-from machine import WDT
 from indicatorLight import IndicatorLight 
 from actuator import Actuator
+from Co2Sensor import Co2Sensor
+from dataWriter2 import DataWriter
+from machine import WDT
+import constants as CONSTANTS
+import time
 
 
 
@@ -10,32 +13,25 @@ class Scheduler:
 
 
     def __init__(self):
+        Scheduler.wdt = WDT(timeout=CONSTANTS.WATCHDOG_TIMEOUT)
         Actuator()
-
-
-
+        Co2Sensor()
+        Actuator.setPosition(CONSTANTS.ACTUATION_EXTENSION_POSITION)
+        Co2Sensor.update()
+        DataWriter(CONSTANTS.DEVICE_NAME)
         Scheduler.running = True
-        Scheduler.time = time.time()
-        Scheduler.wdt = WDT(timeout=7000)
+        Scheduler.duringCycle = False
+        Scheduler.loopStartTime = time.time()
         Scheduler.light = IndicatorLight(0xFFFF00, 2, 1)
+        Co2Sensor.update()
     
-    
-        #TODO: find pin number
-        #Scheduler.actuator = Actuator(2000, )
-    
-    def init(self):
-        Scheduler.light.beating(False)
-        
-
     #Once ran, continuously runs until running is False 
     @staticmethod  
     def run():
         while Scheduler.running:
-            Scheduler.update()
-            Actuator.setPosition(0.5)
-            time.sleep(5)
-            Actuator.setPosition(1)
-            time.sleep(5)
+            Scheduler.currTime = time.time()
+            if Scheduler.currTime + CONSTANTS.CYCLE_PERIOD >= time.time():
+                Scheduler.duringCycle = True
 
 
     #Houskeeping functions
