@@ -23,8 +23,9 @@ class Actuator:
         
     @staticmethod
     def setPosition(newPosition):
-        Actuator.position = newPosition
-        Actuator.update()
+        if not Actuator.position == newPosition:
+            Actuator.position = newPosition
+            Actuator.update()
 
     @staticmethod
     def actuatorPosition():
