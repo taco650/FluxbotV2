@@ -1,7 +1,7 @@
 #Pin that actuator signal uses
 ACTUATOR_PIN = 'P19'
 #Sec required to fully extend actuator
-ACTUATION_TIME = 6
+ACTUATION_TIME = 13
 #Position of the actuator when it is fully retracted
 ACTUATION_RETRACTION_POSITION = 0
 #Position of the actuator when it is fully extended
@@ -15,6 +15,17 @@ CYCLE_PERIOD = 3*60
 #Time for cycle (seconds for measurement process with cloesd lid)(2 min)
 CYCLE_LENGTH = 1*60
 #Measurement freq in closed box (Hz)
-MEASUREMENT_CLOSED_BOX_FRQ = 50
+MEASUREMENT_CLOSED_BOX_FRQ = 1
 #Measurement freq w/ open box
 MEASUREMENT_OPEN_BOX_FRQ = 21
+#Time between open bursts in secs
+BURST_PERIOD = 60
+#Num of Points in Open Box Burst
+OPEN_BURST_POINTS = 5
+#Delay (ms) Between open box burst points
+OPEN_BURST_DELAY = 500
+
+CLOSED_BURST_POINTS = 3*CYCLE_LENGTH
+#Delay (ms) Between open box burst points
+#twofreshmeasurementspersecond
+CLOSED_BURST_DELAY = 500

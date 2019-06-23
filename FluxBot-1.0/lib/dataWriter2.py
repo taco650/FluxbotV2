@@ -26,14 +26,14 @@ class DataWriter:
         DataWriter.fileName = str(DataWriter.deviceID) + '_Fluxbot_Data_' + str(DataWriter.month) +'.'+ str(DataWriter.day) +"."+ str(DataWriter.year) + '.csv'
         
     @staticmethod
-    def write(co2, temp, pressure, humidity, actuatorState):
+    def write(rawCo2, filterCo2, temp, pressure, humidity, actuatorState, log):
         #use 'w' instead of 'a' to create a new file and overwrite the existing
         secondsSinceEpoch = utime.time()
         if not DataWriter.isFileCreated():
-            args = ["DeviceID", "Seconds Since Epoch", "CO2 PPM", "Temp", "Pressure", "Humidity", "ActuatorState"]
+            args = ["DeviceID", "Seconds Since Epoch", "Raw CO2 PPM", "Filter CO2 PPM", "Temp", "Pressure", "Humidity", "ActuatorState", "Log"]
             DataWriter.writeRow(args, -1)
         
-        args = [DataWriter.deviceID, secondsSinceEpoch, co2, temp, pressure, humidity, actuatorState]
+        args = [DataWriter.deviceID, secondsSinceEpoch, rawCo2, filterCo2, temp, pressure, humidity, actuatorState, log]
         DataWriter.writeRow(args, 1)
     
     @staticmethod

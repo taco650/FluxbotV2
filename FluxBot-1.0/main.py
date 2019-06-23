@@ -5,16 +5,13 @@ from actuator import Actuator
 from Co2Sensor import Co2Sensor
 from dataWriter2 import DataWriter
 import constants as CONSTANTS
+from indicatorLight import IndicatorLight
 from scheduler import Scheduler
 import pycom
 import time
 
-
-pycom.heartbeat(False)
-
-Scheduler()
-Scheduler.run()
-
+#Scheduler()
+#Scheduler.run()
 
 '''
 while True:

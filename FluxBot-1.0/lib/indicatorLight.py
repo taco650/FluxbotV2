@@ -1,4 +1,4 @@
-import time
+import utime
 import pycom
 
 
@@ -11,15 +11,16 @@ class IndicatorLight:
     GREEN =  0x00ff00 
     PURPLE = 0xff00ff
     YELLOW = 0xffff00
+    ORANGE = 0xFF4500
     CYAN = 0x42f4ee
+    WHITE = 0xFFFFFF
+    
 
     def __init__(self, color, delay, duration):
         IndicatorLight.heartbeat = False
         self.rgb = color
-        self.delay = delay
-        self.pulseDuration = duration
-        self.delay = delay #in s
-        self.pulseDuration = duration
+        self.delay = 1000* delay #in s
+        self.pulseDuration = 1000*duration
         self.lastPulse = 0
 
     
@@ -39,11 +40,11 @@ class IndicatorLight:
 
    
     def pulse(self):
-        if  not IndicatorLight.heartbeat and self.lastPulse + self.delay <= time.time():
+        if  not IndicatorLight.heartbeat and self.lastPulse + self.delay <= utime.ticks_ms():
             pycom.rgbled(self.rgb)
             self.isOn = True
-            if self.isOn and (self.lastPulse + self.delay + self.pulseDuration <= time.time()):
-                self.lastPulse = time.time()
+            if self.isOn and (self.lastPulse + self.delay + self.pulseDuration <= utime.ticks_ms()):
+                self.lastPulse = utime.ticks_ms()
                 self.isOn = False
                 pycom.rgbled(0x0)
     
