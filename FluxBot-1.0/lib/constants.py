@@ -11,7 +11,7 @@ DEVICE_NAME = "Test"
 #ms unresponsive until device resets
 WATCHDOG_TIMEOUT = 7*1000
 #Time in seconds for each measurement cycle (Start every 58 mins)
-CYCLE_PERIOD = 3*60
+CYCLE_PERIOD = 1*60*60
 #Time for cycle (seconds for measurement process with cloesd lid)(2 min)
 CYCLE_LENGTH = 1*60
 #Measurement freq in closed box (Hz)
