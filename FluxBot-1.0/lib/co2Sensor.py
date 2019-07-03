@@ -63,7 +63,6 @@ class Co2Sensor:
                 
                 return Co2Sensor.recentRawData
             else:
-                print('Co2 Read error')
                 return -1
         else:
             raise Exception("SPI Communication Mode update not implemented.\nUse Communication Mode 2(UART) instead")

@@ -19,13 +19,15 @@ MEASUREMENT_CLOSED_BOX_FRQ = 1
 #Measurement freq w/ open box
 MEASUREMENT_OPEN_BOX_FRQ = 21
 #Time between open bursts in secs
-BURST_PERIOD = 60
+BURST_PERIOD = 20*60
 #Num of Points in Open Box Burst
-OPEN_BURST_POINTS = 5
+OPEN_BURST_POINTS = 3
 #Delay (ms) Between open box burst points
-OPEN_BURST_DELAY = 500
+OPEN_BURST_DELAY = 1000
 
-CLOSED_BURST_POINTS = 3*CYCLE_LENGTH
+CLOSED_BURST_POINTS = 60*5
 #Delay (ms) Between open box burst points
 #twofreshmeasurementspersecond
-CLOSED_BURST_DELAY = 500
+CLOSED_BURST_DELAY = 1000
+
+BURST_DELAY_AFTER_OPEN = 5 * 60

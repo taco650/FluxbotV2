@@ -45,7 +45,7 @@ class IndicatorLight:
             self.isOn = True
             if self.isOn and (self.lastPulse + self.delay + self.pulseDuration <= utime.ticks_ms()):
                 self.lastPulse = utime.ticks_ms()
-                self.isOn = False
+                self.isOn = False                                  
                 pycom.rgbled(0x0)
     
     @staticmethod

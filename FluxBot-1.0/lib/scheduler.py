@@ -1,6 +1,7 @@
 from indicatorLight import IndicatorLight 
 from bme280 import *
-from machine import I2C
+from machine import I2C,RTC
+from pcf8523 import PCF8523
 from actuator import Actuator
 from Co2Sensor import Co2Sensor
 from dataWriter2 import DataWriter
@@ -40,7 +41,12 @@ class Scheduler:
             deviceNotConnected = Scheduler.createI2C()
 
         deviceNotConnected = True
-        
+        Scheduler.intRtc = RTC()
+        now = Scheduler.extRtc.now()
+        Scheduler.intRtc.init((now[0], now[1], now[2], now[3], now[4], now[5], 0))
+        print(Scheduler.intRtc.now())
+        time.sleep(CONSTANTS.WATCHDOG_TIMEOUT/2/1000)
+
         #testing if sd card can be mounted
         while deviceNotConnected:
             Scheduler.mountSDCardLight.pulse()
@@ -53,29 +59,29 @@ class Scheduler:
             Scheduler.co2Light.pulse()
             Co2Sensor.update2()
             deviceNotConnected = Scheduler.co2Disconnected()
-        '''
+        
         goodLightTime = utime.ticks_ms()
         while (goodLightTime + CONSTANTS.ACTUATION_TIME*1000 >= utime.ticks_ms()):
             Scheduler.update()
             Actuator.setPosition(1)
             Scheduler.goodState.pulse()
-            print("Good Actuator Open")
+            print("Actuator Open")
 
         goodLightTime = utime.ticks_ms()
         while (goodLightTime + CONSTANTS.ACTUATION_TIME*1000 >= utime.ticks_ms()):
             Scheduler.update()
             Actuator.setPosition(0)
             Scheduler.goodState.pulse()
-            print("Good Actuator Closed")
+            print("Actuator Closed")
 
         goodLightTime = utime.ticks_ms()
         while (goodLightTime + CONSTANTS.ACTUATION_TIME*1000 >= utime.ticks_ms()):
             Scheduler.update()
             Actuator.setPosition(1)
             Scheduler.goodState.pulse()
-            print("Good Actuator Open")
-
-        '''
+            print("Actuator Open")
+        
+        
             
 
     @staticmethod
@@ -93,10 +99,14 @@ class Scheduler:
         try:
             Scheduler.i2c = I2C(0, I2C.MASTER, baudrate=400000)
             Scheduler.bme = BME280(i2c=Scheduler.i2c, mode=BME280_OSAMPLE_16, address = 119)
+            Scheduler.extRtc = PCF8523(Scheduler.i2c)
+            if Scheduler.extRtc.now()[0]<2019:
+                print("RTC ERROR")
+                return True
             return False
         except Exception as ex:
             print(ex)
-            print("Creating Bme object failed")
+            print("BME or RTC error. Check connections.")
             return True
     
     '''
@@ -164,7 +174,7 @@ class Scheduler:
                 Scheduler.dataBurst(CONSTANTS.CLOSED_BURST_POINTS, CONSTANTS.CLOSED_BURST_DELAY)
                 Actuator.setPosition(CONSTANTS.ACTUATION_EXTENSION_POSITION)
                 Scheduler.nextCycleStartTime += CONSTANTS.CYCLE_PERIOD
-                Scheduler.nextBurstTime = time.time() + CONSTANTS.ACTUATION_TIME
+                Scheduler.nextBurstTime = time.time() + CONSTANTS.ACTUATION_TIME + CONSTANTS.BURST_DELAY_AFTER_OPEN
             elif Scheduler.nextBurstTime <= time.time():
                 Scheduler.dataBurst(CONSTANTS.OPEN_BURST_POINTS, CONSTANTS.OPEN_BURST_DELAY)
                 Scheduler.nextBurstTime += CONSTANTS.BURST_PERIOD
@@ -179,7 +189,7 @@ class Scheduler:
     #Houskeeping functions
     @staticmethod
     def update():
-        print("Running")
+        print(Scheduler.intRtc.now())
         Scheduler.wdt.feed()
 
     @staticmethod
@@ -199,9 +209,10 @@ class Scheduler:
             Scheduler.dataWriteLight.pulse()
             if nextPointTime <= utime.ticks_ms():
                 if Scheduler.co2Disconnected():
-                    log = "ERR"
+                    log = "1"
+                    print("Co2 Read Error")
                 else:
-                    log = "NOR"
+                    log = "0"
                 pointsCompleted += 1
                 nextPointTime = nextPointTime + delayBetweenPoints
                 DataWriter.write(Co2Sensor.recentRawData,Co2Sensor.recentFilterData,Scheduler.bme.temperature,Scheduler.bme.pressure,Scheduler.bme.humidity,Actuator.actuatorPosition(), log)

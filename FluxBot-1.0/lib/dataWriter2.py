@@ -16,7 +16,6 @@ class DataWriter:
     def __init__(self, deviceID):
         DataWriter.sd = SD()
         DataWriter.rtc =RTC()
-        DataWriter.rtc.init((2019,7,1,0,0,0,0,0))
         os.mount(DataWriter.sd, '/sd')
         DataWriter.deviceID = deviceID
         now = DataWriter.rtc.now()
@@ -30,10 +29,10 @@ class DataWriter:
         #use 'w' instead of 'a' to create a new file and overwrite the existing
         secondsSinceEpoch = utime.time()
         if not DataWriter.isFileCreated():
-            args = ["DeviceID", "Seconds Since Epoch", "Raw CO2 PPM", "Filter CO2 PPM", "Temp", "Pressure", "Humidity", "ActuatorState", "Log"]
+            args = ["Sec since 2000", "Raw CO2 PPM", "Filter CO2 PPM", "Temp", "Pressure", "Humidity", "ActuatorState", "ERR"]
             DataWriter.writeRow(args, -1)
         
-        args = [DataWriter.deviceID, secondsSinceEpoch, rawCo2, filterCo2, temp, pressure, humidity, actuatorState, log]
+        args = [secondsSinceEpoch, rawCo2, filterCo2, temp, pressure, humidity, actuatorState, log]
         DataWriter.writeRow(args, 1)
     
     @staticmethod
