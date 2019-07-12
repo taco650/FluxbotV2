@@ -25,6 +25,7 @@ class Scheduler:
         Scheduler.goodState = IndicatorLight(IndicatorLight.GREEN, 0.3, 0.2)
         Scheduler.closedBoxStateLight = IndicatorLight(IndicatorLight.GREEN, 5, .2)
         Scheduler.openBoxStateLight = IndicatorLight(IndicatorLight.CYAN, 5, .2)
+        Scheduler.waitingForDetonationLight = IndicatorLight(IndicatorLight.WHITE, 5, .2)
         Actuator()
         Co2Sensor()
         Actuator.setPosition(CONSTANTS.ACTUATION_EXTENSION_POSITION)
@@ -59,7 +60,7 @@ class Scheduler:
             Scheduler.co2Light.pulse()
             Co2Sensor.update2()
             deviceNotConnected = Scheduler.co2Disconnected()
-        
+        '''
         goodLightTime = utime.ticks_ms()
         while (goodLightTime + CONSTANTS.ACTUATION_TIME*1000 >= utime.ticks_ms()):
             Scheduler.update()
@@ -80,7 +81,7 @@ class Scheduler:
             Actuator.setPosition(1)
             Scheduler.goodState.pulse()
             print("Actuator Open")
-        
+        '''
         
             
 
@@ -189,7 +190,7 @@ class Scheduler:
     #Houskeeping functions
     @staticmethod
     def update():
-        print(Scheduler.intRtc.now())
+        print(Scheduler.extRtc.now())
         Scheduler.wdt.feed()
 
     @staticmethod
@@ -198,6 +199,22 @@ class Scheduler:
             return True
         else:
             return False
+    @staticmethod
+    def waitForDetonation():
+        while True:
+            Scheduler.update()
+            Scheduler.waitingForDetonationLight.pulse()
+            #instant start
+            if CONSTANTS.DETONATION_MONTH == -1:
+                return
+            if Scheduler.intRtc.now()[1] == CONSTANTS.DETONATION_MONTH:
+                if Scheduler.intRtc.now()[2] == CONSTANTS.DETONATION_DAY:
+                    if Scheduler.intRtc.now()[3] == CONSTANTS.DETONATION_HOUR:
+                        if Scheduler.intRtc.now()[4] == CONSTANTS.DETONATION_MINUTE:
+                            return
+            
+            
+
 
     @staticmethod
     def dataBurst(numOfPoints, delayBetweenPoints):
@@ -215,6 +232,6 @@ class Scheduler:
                     log = "0"
                 pointsCompleted += 1
                 nextPointTime = nextPointTime + delayBetweenPoints
-                DataWriter.write(Co2Sensor.recentRawData,Co2Sensor.recentFilterData,Scheduler.bme.temperature,Scheduler.bme.pressure,Scheduler.bme.humidity,Actuator.actuatorPosition(), log)
+                DataWriter.writeData(Co2Sensor.recentRawData,Co2Sensor.recentFilterData,Scheduler.bme.temperature,Scheduler.bme.pressure,Scheduler.bme.humidity,Actuator.actuatorPosition(), log)
 
 

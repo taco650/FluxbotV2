@@ -22,28 +22,29 @@ class DataWriter:
         DataWriter.year = now[0]
         DataWriter.month = now[1]
         DataWriter.day = now[2]
-        DataWriter.fileName = str(DataWriter.deviceID) + '_Fluxbot_Data_' + str(DataWriter.month) +'.'+ str(DataWriter.day) +"."+ str(DataWriter.year) + '.csv'
+        DataWriter.dataFile = str(DataWriter.deviceID) + '_Fluxbot_Data_' + str(DataWriter.month) +'.'+ str(DataWriter.day) +"."+ str(DataWriter.year) + '.csv'
+        DataWriter.logFile = 'bootLog.csv'
         
     @staticmethod
-    def write(rawCo2, filterCo2, temp, pressure, humidity, actuatorState, log):
+    def writeData(rawCo2, filterCo2, temp, pressure, humidity, actuatorState, log):
         #use 'w' instead of 'a' to create a new file and overwrite the existing
         secondsSinceEpoch = utime.time()
-        if not DataWriter.isFileCreated():
+        if not DataWriter.isFileCreated(DataWriter.dataFile):
             args = ["Sec since 2000", "Raw CO2 PPM", "Filter CO2 PPM", "Temp", "Pressure", "Humidity", "ActuatorState", "ERR"]
-            DataWriter.writeRow(args, -1)
+            DataWriter.writeRow(DataWriter.dataFile, args, -1)
         
         args = [secondsSinceEpoch, rawCo2, filterCo2, temp, pressure, humidity, actuatorState, log]
-        DataWriter.writeRow(args, 1)
+        DataWriter.writeRow(DataWriter.dataFile, args, 1)
     
     @staticmethod
-    def writeRow(args = [], mode = 1):
+    def writeRow(fileName, args = [], mode = 1):
         openMode = 'a'
         if mode == -1:
             openMode = 'x'#new file
         elif mode == 1:
             openMode = 'a'#append
 
-        with open(str(DataWriter.pathPrefix) + str(DataWriter.fileName), openMode) as csvfile:
+        with open(str(DataWriter.pathPrefix) + str(fileName), openMode) as csvfile:
                 row = ''
                 for x in args:
                     if row != '':
@@ -55,9 +56,9 @@ class DataWriter:
         
 
     @staticmethod
-    def isFileCreated():
+    def isFileCreated(fileName):
         try:
-            f = open(str(DataWriter.pathPrefix) + str(DataWriter.fileName),'r')
+            f = open(str(DataWriter.pathPrefix) + str(fileName),'r')
             return True
         except:
             return False
