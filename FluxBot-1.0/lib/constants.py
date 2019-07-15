@@ -32,10 +32,8 @@ CLOSED_BURST_DELAY = 1000
 
 BURST_DELAY_AFTER_OPEN = 18 * 60
 
-#put -1 if should conduct measurements instantly
-DETONATION_MONTH = 7
-DETONATION_DAY = 12
+
+
 #Hour (24 hr format) when measurement process starts (0-24)
+#put -1 for instant data write
 DETONATION_HOUR = 11
-#Minute when measurement process starts (0-60)
-DETONATION_MINUTE = 59

@@ -23,7 +23,8 @@ class DataWriter:
         DataWriter.month = now[1]
         DataWriter.day = now[2]
         DataWriter.dataFile = str(DataWriter.deviceID) + '_Fluxbot_Data_' + str(DataWriter.month) +'.'+ str(DataWriter.day) +"."+ str(DataWriter.year) + '.csv'
-        DataWriter.logFile = 'bootLog.csv'
+        DataWriter.logFile = str(DataWriter.deviceID)+ '_bootLog.csv'
+       
         
     @staticmethod
     def writeData(rawCo2, filterCo2, temp, pressure, humidity, actuatorState, log):
@@ -62,6 +63,27 @@ class DataWriter:
             return True
         except:
             return False
+
+    @staticmethod
+    def logBoot(fileName):
+        intRtc = RTC()
+        if DataWriter.isFileCreated(fileName):
+            openMode = 'a'
+        else:
+            openMode = 'x'
+
+        with open(str(DataWriter.pathPrefix) + str(fileName), openMode) as csvfile:
+                row = ''
+                args =intRtc.now()
+                for x in args:
+                    if row != '':
+                        row = row +', '+ str(x)
+                    else:
+                        row = str(x)
+                csvfile.write(str(row)+'\n')
+                csvfile.close()
+
+
     '''
     def test(self):
         self.write(2,3,4,5,6)

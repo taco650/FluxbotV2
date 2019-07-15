@@ -18,5 +18,5 @@ while (bootTime + 2*1000 >= utime.ticks_ms()):
 
 
 Scheduler()
-#Scheduler.waitForDetonation()
-Scheduler.runBurst()   
+Scheduler.waitForDetonation()
+Scheduler.runBurst()

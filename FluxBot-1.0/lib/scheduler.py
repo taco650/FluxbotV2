@@ -161,6 +161,7 @@ class Scheduler:
     '''
     @staticmethod
     def runBurst():
+        DataWriter.logBoot(DataWriter.logFile)
         Scheduler.update()
         Scheduler.currTime = time.time()
         Scheduler.nextBurstTime = time.time()
@@ -199,19 +200,25 @@ class Scheduler:
             return True
         else:
             return False
+    
     @staticmethod
     def waitForDetonation():
         while True:
             Scheduler.update()
             Scheduler.waitingForDetonationLight.pulse()
             #instant start
-            if CONSTANTS.DETONATION_MONTH == -1:
+            if CONSTANTS.DETONATION_HOUR == -1:
                 return
-            if Scheduler.intRtc.now()[1] == CONSTANTS.DETONATION_MONTH:
-                if Scheduler.intRtc.now()[2] == CONSTANTS.DETONATION_DAY:
-                    if Scheduler.intRtc.now()[3] == CONSTANTS.DETONATION_HOUR:
-                        if Scheduler.intRtc.now()[4] == CONSTANTS.DETONATION_MINUTE:
-                            return
+            #check for bootLog File
+            #If present, wait until "on the hour"
+            if DataWriter.isFileCreated(str(CONSTANTS.DEVICE_NAME) + '_bootLog.csv'):
+                while True:
+                    Scheduler.update()
+                    if Scheduler.intRtc.now()[4] == 0:
+                        return
+
+            if Scheduler.intRtc.now()[3] == CONSTANTS.DETONATION_HOUR:
+                return
             
             
 
