@@ -30,10 +30,10 @@ CLOSED_BURST_POINTS = 60*5
 #twofreshmeasurementspersecond
 CLOSED_BURST_DELAY = 1000
 
-BURST_DELAY_AFTER_OPEN = 18 * 60
 
 
 
-#Hour (24 hr format) when measurement process starts (0-24)
+
+#Hour (24 hr format) when measurement process starts (0-23)
 #put -1 for instant data write
-DETONATION_HOUR = 11
+DETONATION_HOUR = 20
