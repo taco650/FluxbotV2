@@ -166,7 +166,7 @@ class Scheduler:
         Scheduler.currTime = time.time()
         Scheduler.nextBurstTime = time.time()
         #Scheduler.nextCycleStartTime = time.time() + CONSTANTS.CYCLE_PERIOD - (CONSTANTS.OPEN_BURST_POINTS * CONSTANTS.OPEN_BURST_DELAY/1000)
-        Scheduler.nextCycleStartTime = time.time() + CONSTANTS.CYCLE_PERIOD - int((CONSTANTS.OPEN_BURST_POINTS * CONSTANTS.OPEN_BURST_DELAY)/1000)
+        Scheduler.nextCycleStartTime = time.time() + 1 + CONSTANTS.CYCLE_PERIOD - int((CONSTANTS.OPEN_BURST_POINTS * CONSTANTS.OPEN_BURST_DELAY)/1000)
 
         while Scheduler.running:
             Scheduler.update()
@@ -180,7 +180,7 @@ class Scheduler:
                 #Scheduler.nextCycleStartTime = time.time() + CONSTANTS.CYCLE_PERIOD - (CONSTANTS.OPEN_BURST_POINTS * CONSTANTS.OPEN_BURST_DELAY/1000.0)
                 Scheduler.nextCycleStartTime += 3600
 
-                Scheduler.nextBurstTime = time.time()
+                Scheduler.nextBurstTime = time.time() + 1
             elif Scheduler.nextBurstTime <= time.time():
                 Scheduler.nextBurstTime += CONSTANTS.BURST_PERIOD
                 Scheduler.dataBurst(CONSTANTS.OPEN_BURST_POINTS, CONSTANTS.OPEN_BURST_DELAY)
