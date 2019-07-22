@@ -8,15 +8,17 @@ from dataWriter2 import DataWriter
 from machine import WDT
 import constants as CONSTANTS
 import time
-import utime
+from machine import Timer
+
 
 
 
 class Scheduler:
     running = True
-
+    chrono = Timer.Chrono()
 
     def __init__(self):
+
         Scheduler.wdt = WDT(timeout=CONSTANTS.WATCHDOG_TIMEOUT)
         Scheduler.dataWriteLight = IndicatorLight(IndicatorLight.PURPLE, .3, .2)
         Scheduler.mountSDCardLight = IndicatorLight(IndicatorLight.PURPLE, .3, .2)
@@ -58,30 +60,33 @@ class Scheduler:
         #testing if co2 sensor is connected
         while deviceNotConnected:
             Scheduler.co2Light.pulse()
+            print("Not working")
             Co2Sensor.update2()
             deviceNotConnected = Scheduler.co2Disconnected()
-        '''
-        goodLightTime = utime.ticks_ms()
-        while (goodLightTime + CONSTANTS.ACTUATION_TIME*1000 >= utime.ticks_ms()):
+
+        Scheduler.chrono.start()
+        while (CONSTANTS.ACTUATION_TIME >= Scheduler.chrono.read()):
             Scheduler.update()
-            Actuator.setPosition(1)
+            Actuator.setPosition(CONSTANTS.ACTUATION_EXTENSION_POSITION)
             Scheduler.goodState.pulse()
             print("Actuator Open")
 
-        goodLightTime = utime.ticks_ms()
-        while (goodLightTime + CONSTANTS.ACTUATION_TIME*1000 >= utime.ticks_ms()):
+        Scheduler.chrono.reset()
+        Scheduler.chrono.start()
+        while (CONSTANTS.ACTUATION_TIME >= Scheduler.chrono.read()):
             Scheduler.update()
-            Actuator.setPosition(0)
+            Actuator.setPosition(CONSTANTS.ACTUATION_RETRACTION_POSITION)
             Scheduler.goodState.pulse()
             print("Actuator Closed")
 
-        goodLightTime = utime.ticks_ms()
-        while (goodLightTime + CONSTANTS.ACTUATION_TIME*1000 >= utime.ticks_ms()):
+        Scheduler.chrono.reset()
+        Scheduler.chrono.start()
+        while (CONSTANTS.ACTUATION_TIME >= Scheduler.chrono.read()):
             Scheduler.update()
-            Actuator.setPosition(1)
+            Actuator.setPosition(CONSTANTS.ACTUATION_EXTENSION_POSITION)
             Scheduler.goodState.pulse()
             print("Actuator Open")
-        '''
+        Scheduler.chrono.stop()
 
 
 
@@ -101,7 +106,7 @@ class Scheduler:
             Scheduler.i2c = I2C(0, I2C.MASTER, baudrate=400000)
             Scheduler.bme = BME280(i2c=Scheduler.i2c, mode=BME280_OSAMPLE_16, address = 119)
             Scheduler.extRtc = PCF8523(Scheduler.i2c)
-            if Scheduler.extRtc.now()[0]<2019:
+            if Scheduler.extRtc.now()[0]<2000:
                 print("RTC ERROR")
                 return True
             return False
@@ -190,6 +195,35 @@ class Scheduler:
 
 
 
+    @staticmethod
+    def runBurstTest():
+        DataWriter.logBoot(DataWriter.logFile)
+        Scheduler.update()
+        Scheduler.currTime = time.time()
+        Scheduler.nextBurstTime = time.time()
+        #Scheduler.nextCycleStartTime = time.time() + CONSTANTS.CYCLE_PERIOD - (CONSTANTS.OPEN_BURST_POINTS * CONSTANTS.OPEN_BURST_DELAY/1000)
+        Scheduler.nextCycleStartTime = time.time() + 6 - int((CONSTANTS.OPEN_BURST_POINTS * CONSTANTS.OPEN_BURST_DELAY)/1000)
+
+        while Scheduler.running:
+            Scheduler.update()
+            Co2Sensor.update2()
+            if Scheduler.nextCycleStartTime <= time.time():
+                Scheduler.closedBoxStateLight.pulse()
+                Scheduler.dataBurst(CONSTANTS.OPEN_BURST_POINTS, CONSTANTS.OPEN_BURST_DELAY)
+                Actuator.setPosition(CONSTANTS.ACTUATION_RETRACTION_POSITION)
+                Scheduler.dataBurst(CONSTANTS.CLOSED_BURST_POINTS, CONSTANTS.CLOSED_BURST_DELAY)
+                Actuator.setPosition(CONSTANTS.ACTUATION_EXTENSION_POSITION)
+                #Scheduler.nextCycleStartTime = time.time() + CONSTANTS.CYCLE_PERIOD - (CONSTANTS.OPEN_BURST_POINTS * CONSTANTS.OPEN_BURST_DELAY/1000.0)
+                Scheduler.running = False
+            elif Scheduler.nextBurstTime <= time.time():
+                Scheduler.nextBurstTime += CONSTANTS.BURST_PERIOD
+                Scheduler.dataBurst(CONSTANTS.OPEN_BURST_POINTS, CONSTANTS.OPEN_BURST_DELAY)
+            else:
+                Scheduler.openBoxStateLight.pulse()
+
+        while True:
+            Scheduler.update()
+
 
 
     #Houskeeping functions
@@ -200,7 +234,7 @@ class Scheduler:
 
     @staticmethod
     def co2Disconnected():
-        if Co2Sensor.lastGoodRead + Co2Sensor.errorTimeoutTime <= utime.ticks_ms():
+        if Co2Sensor.chrono.read() >= Co2Sensor.errorTimeoutTime:
             return True
         else:
             return False
@@ -230,18 +264,20 @@ class Scheduler:
 
     @staticmethod
     def dataBurst(numOfPoints, delayBetweenPoints):
+        chrono = Timer.Chrono()
         pointsCompleted = 0
-        nextPointTime = utime.ticks_ms()
+        nextPointTime = 0
+        chrono.start()
         while pointsCompleted < numOfPoints:
             Scheduler.update()
             Co2Sensor.update2()
             Scheduler.dataWriteLight.pulse()
-            if nextPointTime <= utime.ticks_ms():
+            if nextPointTime <= chrono.read_ms():
                 if Scheduler.co2Disconnected():
                     log = "1"
                     print("Co2 Read Error")
                 else:
                     log = "0"
                 pointsCompleted += 1
-                nextPointTime = nextPointTime + delayBetweenPoints
+                nextPointTime += delayBetweenPoints
                 DataWriter.writeData(Co2Sensor.recentRawData,Co2Sensor.recentFilterData,Scheduler.bme.temperature,Scheduler.bme.pressure,Scheduler.bme.humidity,Actuator.actuatorPosition(), log)

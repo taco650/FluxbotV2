@@ -5,7 +5,7 @@ ACTUATION_TIME = 13
 #Position of the actuator when it is fully retracted
 ACTUATION_RETRACTION_POSITION = 0
 #Position of the actuator when it is fully extended
-ACTUATION_EXTENSION_POSITION = 0.9
+ACTUATION_EXTENSION_POSITION = 0.75
 #Name that is put on the CSV
 DEVICE_NAME = "Test"
 #ms unresponsive until device resets

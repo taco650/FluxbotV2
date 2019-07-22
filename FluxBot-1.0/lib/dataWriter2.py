@@ -1,16 +1,15 @@
 from machine import SD
 from machine import RTC
-import utime
 import os
-
+import utime
 
 
 class DataWriter:
     'Used to write sensor data to the SD card in a csv(Excel) format.'
-    
+
     deviceID = "Default"
     pathPrefix ='/sd/'
-    
+
 
 
     def __init__(self, deviceID):
@@ -24,8 +23,8 @@ class DataWriter:
         DataWriter.day = now[2]
         DataWriter.dataFile = str(DataWriter.deviceID) + '_Fluxbot_Data_' + str(DataWriter.month) +'.'+ str(DataWriter.day) +"."+ str(DataWriter.year) + '.csv'
         DataWriter.logFile = str(DataWriter.deviceID)+ '_bootLog.csv'
-       
-        
+
+
     @staticmethod
     def writeData(rawCo2, filterCo2, temp, pressure, humidity, actuatorState, log):
         #use 'w' instead of 'a' to create a new file and overwrite the existing
@@ -33,10 +32,10 @@ class DataWriter:
         if not DataWriter.isFileCreated(DataWriter.dataFile):
             args = ["Sec since 2000", "Raw CO2 PPM", "Filter CO2 PPM", "Temp", "Pressure", "Humidity", "ActuatorState", "ERR"]
             DataWriter.writeRow(DataWriter.dataFile, args, -1)
-        
+
         args = [secondsSinceEpoch, rawCo2, filterCo2, temp, pressure, humidity, actuatorState, log]
         DataWriter.writeRow(DataWriter.dataFile, args, 1)
-    
+
     @staticmethod
     def writeRow(fileName, args = [], mode = 1):
         openMode = 'a'
@@ -54,7 +53,7 @@ class DataWriter:
                         row = str(x)
                 csvfile.write(str(row)+'\n')
                 csvfile.close()
-        
+
 
     @staticmethod
     def isFileCreated(fileName):

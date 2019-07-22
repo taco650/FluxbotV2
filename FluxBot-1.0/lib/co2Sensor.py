@@ -3,20 +3,21 @@
 #Uses UART to communicate
 from machine import UART
 import time
-import utime
+from machine import Timer
 
 class Co2Sensor:
     SPI_MODE = 1
     UART_MODE = 2
-    communicationMode = 2    
+    communicationMode = 2
     recentRawData = -1
     recentFilterData = -1
     errorCount = 0
-    lastGoodRead = utime.ticks_ms()
-    errorTimeoutTime = 500
+    chrono = Timer.Chrono()
+    errorTimeoutTime = .5
 
 
     def __init__(self, communicationMode = 2):
+        Co2Sensor.chrono.start()
         if communicationMode == Co2Sensor.SPI_MODE:
             Co2Sensor.communicationMode = Co2Sensor.SPI_MODE
             print("SPI MODE NOT IMPLEMENTED")
@@ -32,7 +33,8 @@ class Co2Sensor:
             time.sleep(.3)
             Co2Sensor.update2()
 
-    
+
+    '''
     @staticmethod
     def update():
         if Co2Sensor.communicationMode == Co2Sensor.UART_MODE:
@@ -43,7 +45,7 @@ class Co2Sensor:
             return Co2Sensor.recentData
         else:
             raise Exception("SPI Communication Mode update not implemented.\nUse Communication Mode 2(UART) instead")
-
+    '''
     @staticmethod
     def update2():
         if Co2Sensor.communicationMode == Co2Sensor.UART_MODE:
@@ -59,16 +61,17 @@ class Co2Sensor:
                 if Co2Sensor.dataArr.find('z') == 8:
                     Co2Sensor.recentRawData = int(Co2Sensor.dataArr[10:])
                     if firstGood:
-                        Co2Sensor.lastGoodRead = utime.ticks_ms()
-                
+                        Co2Sensor.chrono.reset()
+                        Co2Sensor.chrono.start()
+
                 return Co2Sensor.recentRawData
             else:
                 return -1
         else:
             raise Exception("SPI Communication Mode update not implemented.\nUse Communication Mode 2(UART) instead")
-        
 
-      
+
+
     @staticmethod
     def returnRaw():
         if Co2Sensor.communicationMode == Co2Sensor.UART_MODE:
@@ -81,7 +84,7 @@ class Co2Sensor:
                 return -1
         else:
             raise Exception("SPI Communication Mode update not implemented.\nUse Communication Mode 2(UART) instead")
-  
+
     @staticmethod
     def test():
         while True:
