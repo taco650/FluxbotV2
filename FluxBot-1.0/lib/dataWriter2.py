@@ -30,7 +30,7 @@ class DataWriter:
         #use 'w' instead of 'a' to create a new file and overwrite the existing
         secondsSinceEpoch = utime.time()
         if not DataWriter.isFileCreated(DataWriter.dataFile):
-            args = ["Sec since 2000", "Raw CO2 PPM", "Filter CO2 PPM", "Temp", "Pressure", "Humidity", "ActuatorState", "ERR"]
+            args = ["Unix Epoch Time", "Raw CO2 PPM", "Filter CO2 PPM", "Temp", "Pressure", "Humidity", "ActuatorState", "ERR"]
             DataWriter.writeRow(DataWriter.dataFile, args, -1)
 
         args = [secondsSinceEpoch, rawCo2, filterCo2, temp, pressure, humidity, actuatorState, log]
