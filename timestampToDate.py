@@ -1,11 +1,8 @@
 from datetime import datetime
 from os import walk
-from shutil import copyfile
 import csv
 import os.path
 
-
-#copyfile("./Test.csv", "./TestDuplicate.csv")
 f = []
 for (dirpath, dirnames, filenames) in walk("./"):
     f.extend(filenames)
