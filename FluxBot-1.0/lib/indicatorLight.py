@@ -16,19 +16,21 @@ class IndicatorLight:
     WHITE = 0xFFFFFF
 
 
-    def __init__(self, color, delay, duration):
+    def __init__(self, colors, delay, duration):
         pycom.heartbeat(False)
-        self.rgb = color
+        self.rgb = []
+        self.rgb.extend(colors)
+        self.currentIndex = 0
         self.delay = delay #in s
-        self.pulseDuration =duration
+        self.pulseDuration = duration
         self.chrono = Timer.Chrono()
         self.chrono.start()
         self.lastPulse = self.chrono.read()
-        self.isOn = False
+        self.isChanging = False
 
 
-    def setLightColor(self,color):
-        self.rgb = color
+    def setLightColor(self,colors = []):
+        self.rgb = colors
 
     #Set delay to 0 to have a solid light
     def setDelay(self, seconds):
@@ -41,16 +43,66 @@ class IndicatorLight:
     def stop(self):
         self.pulseDuration = 0
 
+    def on(self):
+        pycom.rgbled(self.rgb)
+    def off(self):
+        pycom.rgbled(0x0)
+
+    def endPulse(self):
+        if not self.isChanging and self.lastPulse + self.pulseDuration <= self.chrono.read():
+            self.currentIndex = 0
+            pycom.rgbled(0x0)
+            self.isChanging = True
 
     def pulse(self):
 
-        if not self.isOn and self.lastPulse + self.delay <= self.chrono.read():
-            pycom.rgbled(self.rgb)
-            self.isOn = True
-        if self.isOn and self.lastPulse + self.delay +  self.pulseDuration <= self.chrono.read():
-            self.lastPulse = self.chrono.read()
-            self.isOn = False
+        #Index changing and timing logic
+        if not self.isChanging and self.lastPulse + self.pulseDuration <= self.chrono.read():
+            self.currentIndex += 1
+            self.isChanging = True
+
+        #Color changing logic
+        if self.currentIndex < len(self.rgb):
+            if self.isChanging:
+                pycom.rgbled(self.rgb[self.currentIndex])
+                self.lastPulse = self.chrono.read()
+                self.isChanging = False
+        else:
             pycom.rgbled(0x0)
+            if self.lastPulse + self.delay + self.pulseDuration <= self.chrono.read():
+                self.isChanging = False
+                self.currentIndex = -1
+                self.lastPulse = self.chrono.read()
+
+
+
+        '''
+        if self.currentIndex != -1 and self.lastPulse + self.duration <= self.chrono.read():
+            pycom.rgbled(self.rgb[self.currentIndex])#iterate  each time
+            self.currentIndex += 1
+            self.lastPulse = self.chrono.read()
+            if self.currentIndex > len(self.rgb) - 1:
+                self.currentIndex = -1
+        elif self.currentIndex == -1 and self.lastPulse + self.delay + self. <= self.chrono.read():
+            self.currentIndex = 0
+
+
+            else:
+                #next color is blank
+                if self.isOn and self.lastPulse + self.delay +  self.pulseDuration <= self.chrono.read():
+                    self.currentIndex = 0
+                    self.lastPulse = self.chrono.read()
+                    self.isOn = False
+                    pycom.rgbled(0x0)
+
+
+
+        if len(self.rgb) > self.currentIndex + 1:
+            self.currentIndex += 1
+            self.lastPulse = self.chrono.read()
+
+        '''
+
 
     @staticmethod
     def beating(beating):

@@ -14,7 +14,7 @@ class DataWriter:
 
     def __init__(self, deviceID):
         DataWriter.sd = SD()
-        DataWriter.rtc =RTC()
+        DataWriter.rtc = RTC()
         os.mount(DataWriter.sd, '/sd')
         DataWriter.deviceID = deviceID
         now = DataWriter.rtc.now()
@@ -23,21 +23,36 @@ class DataWriter:
         DataWriter.day = now[2]
         DataWriter.dataFile = str(DataWriter.deviceID) + '_Fluxbot_Data_' + str(DataWriter.month) +'.'+ str(DataWriter.day) +"."+ str(DataWriter.year) + '.csv'
         DataWriter.logFile = str(DataWriter.deviceID)+ '_bootLog.csv'
+        DataWriter.isMounted = True
+        DataWriter.dataBuffer = []
+
 
 
     @staticmethod
     def writeData(rawCo2, filterCo2, temp, pressure, humidity, actuatorState, log):
         #use 'w' instead of 'a' to create a new file and overwrite the existing
         secondsSinceEpoch = utime.time()
-        if not DataWriter.isFileCreated(DataWriter.dataFile):
-            args = ["Unix Epoch Time", "Raw CO2 PPM", "Filter CO2 PPM", "Temp", "Pressure", "Humidity", "ActuatorState", "ERR"]
-            DataWriter.writeRow(DataWriter.dataFile, args, -1)
-
         args = [secondsSinceEpoch, rawCo2, filterCo2, temp, pressure, humidity, actuatorState, log]
-        DataWriter.writeRow(DataWriter.dataFile, args, 1)
+        DataWriter.dataBuffer.append(args)
+
+        '''print(DataWriter.dataBuffer)
+        if len(DataWriter.dataBuffer) > 5:
+            print(DataWriter.dataBuffer.pop(0))
+        '''
+
+        '''if not DataWriter.isFileCreated(DataWriter.dataFile):
+            headers = ["Unix Epoch Time", "Raw CO2 PPM", "Filter CO2 PPM", "Temp", "Pressure", "Humidity", "ActuatorState", "ERR"]
+            DataWriter.writeRow(DataWriter.dataFile, headers, -1)
+        '''
+    @staticmethod
+    def writeHeaders():
+        if not DataWriter.isFileCreated(DataWriter.dataFile):
+            headers = ["Unix Epoch Time", "Raw CO2 PPM", "Filter CO2 PPM", "Temp", "Pressure", "Humidity", "ActuatorState", "ERR"]
+            DataWriter.writeRow(DataWriter.dataFile, headers, -1)
 
     @staticmethod
     def writeRow(fileName, args = [], mode = 1):
+
         openMode = 'a'
         if mode == -1:
             openMode = 'x'#new file
@@ -53,6 +68,9 @@ class DataWriter:
                         row = str(x)
                 csvfile.write(str(row)+'\n')
                 csvfile.close()
+
+
+
 
 
     @staticmethod
