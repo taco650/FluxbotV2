@@ -36,4 +36,4 @@ CLOSED_BURST_DELAY = 1000
 
 #Hour (24 hr format) when measurement process starts (0-23)
 #put -1 for instant data write
-DETONATION_HOUR = 20
+DETONATION_HOUR = 23

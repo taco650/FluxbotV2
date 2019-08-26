@@ -19,7 +19,7 @@ bootChrono.stop()
 
 
 Scheduler()
-#Scheduler.waitForDetonation()
+Scheduler.waitForDetonation()
 Scheduler.runBurst()
 
 #Scheduler.runBurstTest()

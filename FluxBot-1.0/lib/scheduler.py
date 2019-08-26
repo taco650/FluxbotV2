@@ -85,7 +85,7 @@ class Scheduler:
             deviceNotConnected = Scheduler.co2Disconnected()
 
 
-        '''
+
         Scheduler.chrono.start()
         while (CONSTANTS.ACTUATION_TIME >= Scheduler.chrono.read()):
             Scheduler.update()
@@ -109,7 +109,7 @@ class Scheduler:
             Scheduler.goodState.pulse()
             print("Actuator Open")
         Scheduler.chrono.stop()
-        '''
+        
 
 
     @staticmethod
@@ -403,7 +403,7 @@ class Scheduler:
 
         Scheduler.flushLight.endPulse()
 
-
+    '''
     @staticmethod
     def testWrite():
         print('Test Write start')
@@ -437,3 +437,4 @@ class Scheduler:
             if nextPointTime <= chrono.read_ms():
                 DataWriter.writeData(0,0,0,0,0,0, "Test")
                 nextPointTime += 5000
+     '''
