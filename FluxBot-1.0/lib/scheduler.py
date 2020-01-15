@@ -192,7 +192,6 @@ class Scheduler:
         Scheduler.update()
         Scheduler.currTime = time.time()
         Scheduler.nextBurstTime = time.time()
-        #Scheduler.nextCycleStartTime = time.time() + CONSTANTS.CYCLE_PERIOD - (CONSTANTS.OPEN_BURST_POINTS * CONSTANTS.OPEN_BURST_DELAY/1000)
         Scheduler.nextCycleStartTime = time.time() + 1 + CONSTANTS.CYCLE_PERIOD - int((CONSTANTS.OPEN_BURST_POINTS * CONSTANTS.OPEN_BURST_DELAY)/1000)
 
         while Scheduler.running:
@@ -241,6 +240,32 @@ class Scheduler:
 
                 else:
                     Scheduler.unmountRedLight.pulse()
+
+    #Runs continuously and records data at 1Hz
+    @staticmethod
+    def runContinuous():
+        DataWriter.logBoot(DataWriter.logFile)
+        Scheduler.update()
+        Scheduler.currTime = time.time()
+        Scheduler.nextCycleStartTime = time.time()
+
+        while Scheduler.running:
+            Scheduler.update()
+            Co2Sensor.update2()
+            if Scheduler.nextCycleStartTime <= time.time():
+                Scheduler.nextCycleStartTime += 1
+                if not DataWriter.isMounted:
+                    DataWriter.sd = SD()
+                    os.mount(DataWriter.sd, '/sd')
+                    DataWriter.isMounted = True
+                    Scheduler.state = -1
+
+                Scheduler.dataBurst(1, 0)
+                
+            
+            else:
+                gc.collect()
+                Scheduler.unmountRedLight.pulse()
 
 
 
